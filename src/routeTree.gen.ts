@@ -11,6 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
+import { Route as AppMessagesRouteImport } from './routes/_app.messages'
+import { Route as AppExploreRouteImport } from './routes/_app.explore'
+import { Route as AppMessagesIndexRouteImport } from './routes/_app.messages.index'
+import { Route as AppMessagesIdRouteImport } from './routes/_app.messages.$id'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -21,24 +26,77 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMessagesRoute = AppMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExploreRoute = AppExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMessagesIndexRoute = AppMessagesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppMessagesRoute,
+} as any)
+const AppMessagesIdRoute = AppMessagesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppMessagesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/explore': typeof AppExploreRoute
+  '/messages': typeof AppMessagesRouteWithChildren
+  '/notifications': typeof AppNotificationsRoute
+  '/messages/$id': typeof AppMessagesIdRoute
+  '/messages/': typeof AppMessagesIndexRoute
 }
 export interface FileRoutesByTo {
+  '/explore': typeof AppExploreRoute
+  '/notifications': typeof AppNotificationsRoute
   '/': typeof AppIndexRoute
+  '/messages/$id': typeof AppMessagesIdRoute
+  '/messages': typeof AppMessagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_app/explore': typeof AppExploreRoute
+  '/_app/messages': typeof AppMessagesRouteWithChildren
+  '/_app/notifications': typeof AppNotificationsRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/messages/$id': typeof AppMessagesIdRoute
+  '/_app/messages/': typeof AppMessagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/explore'
+    | '/messages'
+    | '/notifications'
+    | '/messages/$id'
+    | '/messages/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/_app' | '/_app/'
+  to: '/explore' | '/notifications' | '/' | '/messages/$id' | '/messages'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/_app/explore'
+    | '/_app/messages'
+    | '/_app/notifications'
+    | '/_app/'
+    | '/_app/messages/$id'
+    | '/_app/messages/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -61,14 +119,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/messages': {
+      id: '/_app/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AppMessagesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/explore': {
+      id: '/_app/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof AppExploreRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/messages/': {
+      id: '/_app/messages/'
+      path: '/'
+      fullPath: '/messages/'
+      preLoaderRoute: typeof AppMessagesIndexRouteImport
+      parentRoute: typeof AppMessagesRoute
+    }
+    '/_app/messages/$id': {
+      id: '/_app/messages/$id'
+      path: '/$id'
+      fullPath: '/messages/$id'
+      preLoaderRoute: typeof AppMessagesIdRouteImport
+      parentRoute: typeof AppMessagesRoute
+    }
   }
 }
 
+interface AppMessagesRouteChildren {
+  AppMessagesIdRoute: typeof AppMessagesIdRoute
+  AppMessagesIndexRoute: typeof AppMessagesIndexRoute
+}
+
+const AppMessagesRouteChildren: AppMessagesRouteChildren = {
+  AppMessagesIdRoute: AppMessagesIdRoute,
+  AppMessagesIndexRoute: AppMessagesIndexRoute,
+}
+
+const AppMessagesRouteWithChildren = AppMessagesRoute._addFileChildren(
+  AppMessagesRouteChildren,
+)
+
 interface AppRouteChildren {
+  AppExploreRoute: typeof AppExploreRoute
+  AppMessagesRoute: typeof AppMessagesRouteWithChildren
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppExploreRoute: AppExploreRoute,
+  AppMessagesRoute: AppMessagesRouteWithChildren,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
