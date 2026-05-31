@@ -1,9 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { LumeraWordmark } from "@/components/lumera-logo";
-import { Github, Mail } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in · Lumera" }] }),
@@ -16,6 +19,42 @@ function Login() {
 
 export function AuthShell({ mode }: { mode: "login" | "register" }) {
   const isLogin = mode === "login";
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Welcome back!");
+        navigate({ to: "/" });
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { full_name: fullName, username: username || email.split("@")[0] },
+          },
+        });
+        if (error) throw error;
+        toast.success("Account created! Check your email to confirm.");
+        navigate({ to: "/" });
+      }
+    } catch (err: any) {
+      toast.error(err.message ?? "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="relative grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-gradient-aurora lg:block">
@@ -42,43 +81,33 @@ export function AuthShell({ mode }: { mode: "login" | "register" }) {
             {isLogin ? "Sign in to continue to Lumera." : "Join the Lumera community."}
           </p>
 
-          <div className="mt-6 grid gap-2">
-            <Button variant="outline" className="h-11 w-full rounded-xl">
-              <Github className="mr-2 h-4 w-4" /> Continue with Google
-            </Button>
-            <Button variant="outline" className="h-11 w-full rounded-xl">
-              <Mail className="mr-2 h-4 w-4" /> Continue with Apple
-            </Button>
-          </div>
-
-          <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="h-px flex-1 bg-border" /> OR <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <form className="space-y-4">
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
             {!isLogin && (
-              <div>
-                <Label className="text-xs">Full name</Label>
-                <Input className="mt-1 h-11 rounded-xl" placeholder="Ava Kim" />
-              </div>
+              <>
+                <div>
+                  <Label className="text-xs">Full name</Label>
+                  <Input className="mt-1 h-11 rounded-xl" placeholder="Ava Kim" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                </div>
+                <div>
+                  <Label className="text-xs">Username</Label>
+                  <Input className="mt-1 h-11 rounded-xl" placeholder="ava.kim" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                </div>
+              </>
             )}
             <div>
               <Label className="text-xs">Email</Label>
-              <Input className="mt-1 h-11 rounded-xl" type="email" placeholder="you@lumera.app" />
+              <Input className="mt-1 h-11 rounded-xl" type="email" placeholder="you@lumera.app" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div>
               <div className="flex items-center justify-between">
                 <Label className="text-xs">Password</Label>
-                {isLogin && <a className="text-xs text-primary hover:underline" href="#">Forgot?</a>}
               </div>
-              <Input className="mt-1 h-11 rounded-xl" type="password" placeholder="••••••••" />
+              <Input className="mt-1 h-11 rounded-xl" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             </div>
 
-            <Link to="/" className="block">
-              <Button type="button" className="h-11 w-full rounded-xl bg-gradient-aurora font-bold text-background shadow-glow">
-                {isLogin ? "Sign in" : "Create account"}
-              </Button>
-            </Link>
+            <Button type="submit" disabled={loading} className="shimmer h-11 w-full rounded-xl bg-gradient-aurora font-bold text-background shadow-glow">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isLogin ? "Sign in" : "Create account"}
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
@@ -87,6 +116,9 @@ export function AuthShell({ mode }: { mode: "login" | "register" }) {
             ) : (
               <>Already have one? <Link to="/login" className="font-bold text-primary hover:underline">Sign in</Link></>
             )}
+          </p>
+          <p className="mt-2 flex items-center justify-center gap-1 text-center text-xs text-muted-foreground">
+            <Mail className="h-3 w-3" /> Email/password sign-in powered by Lovable Cloud
           </p>
         </div>
       </div>
