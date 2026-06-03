@@ -82,11 +82,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Lumera — light up your social" },
       { name: "description", content: "Lumera is a real-time social platform for posts, chat, and video calls." },
       { name: "author", content: "AIRCIMPco" },
-      { property: "og:title", content: "Lumera" },
-      { property: "og:description", content: "Real-time social, chat, and calls." },
+      { property: "og:title", content: "Lumera — light up your social" },
+      { property: "og:description", content: "Lumera is a real-time social platform for posts, chat, and video calls." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Lumera — light up your social" },
+      { name: "twitter:description", content: "Lumera is a real-time social platform for posts, chat, and video calls." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/abda4615-d0b0-4513-97cc-a5df02f60163/id-preview-4b3e6db4--e4fe2704-14b7-43ad-9f1e-a9fdcddc9053.lovable.app-1780503402250.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/abda4615-d0b0-4513-97cc-a5df02f60163/id-preview-4b3e6db4--e4fe2704-14b7-43ad-9f1e-a9fdcddc9053.lovable.app-1780503402250.png" },
     ],
     links: [
       {
