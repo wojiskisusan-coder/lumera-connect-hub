@@ -13,14 +13,8 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
-import { Route as CallIdRouteImport } from './routes/call.$id'
-import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
-import { Route as AppMessagesRouteImport } from './routes/_app.messages'
-import { Route as AppExploreRouteImport } from './routes/_app.explore'
-import { Route as AppMessagesIndexRouteImport } from './routes/_app.messages.index'
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
-import { Route as AppMessagesIdRouteImport } from './routes/_app.messages.$id'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -41,86 +35,39 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const CallIdRoute = CallIdRouteImport.update({
-  id: '/call/$id',
-  path: '/call/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
   getParentRoute: () => AppRoute,
-} as any)
-const AppMessagesRoute = AppMessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppExploreRoute = AppExploreRouteImport.update({
-  id: '/explore',
-  path: '/explore',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMessagesIndexRoute = AppMessagesIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppMessagesRoute,
 } as any)
 const AppProfileUsernameRoute = AppProfileUsernameRouteImport.update({
   id: '/profile/$username',
   path: '/profile/$username',
   getParentRoute: () => AppRoute,
 } as any)
-const AppMessagesIdRoute = AppMessagesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppMessagesRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/explore': typeof AppExploreRoute
-  '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
-  '/settings': typeof AppSettingsRoute
-  '/call/$id': typeof CallIdRoute
-  '/messages/$id': typeof AppMessagesIdRoute
   '/profile/$username': typeof AppProfileUsernameRoute
-  '/messages/': typeof AppMessagesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/explore': typeof AppExploreRoute
   '/notifications': typeof AppNotificationsRoute
-  '/settings': typeof AppSettingsRoute
-  '/call/$id': typeof CallIdRoute
   '/': typeof AppIndexRoute
-  '/messages/$id': typeof AppMessagesIdRoute
   '/profile/$username': typeof AppProfileUsernameRoute
-  '/messages': typeof AppMessagesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_app/explore': typeof AppExploreRoute
-  '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
-  '/_app/settings': typeof AppSettingsRoute
-  '/call/$id': typeof CallIdRoute
   '/_app/': typeof AppIndexRoute
-  '/_app/messages/$id': typeof AppMessagesIdRoute
   '/_app/profile/$username': typeof AppProfileUsernameRoute
-  '/_app/messages/': typeof AppMessagesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,47 +75,24 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
-    | '/explore'
-    | '/messages'
     | '/notifications'
-    | '/settings'
-    | '/call/$id'
-    | '/messages/$id'
     | '/profile/$username'
-    | '/messages/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/login'
-    | '/register'
-    | '/explore'
-    | '/notifications'
-    | '/settings'
-    | '/call/$id'
-    | '/'
-    | '/messages/$id'
-    | '/profile/$username'
-    | '/messages'
+  to: '/login' | '/register' | '/notifications' | '/' | '/profile/$username'
   id:
     | '__root__'
     | '/_app'
     | '/login'
     | '/register'
-    | '/_app/explore'
-    | '/_app/messages'
     | '/_app/notifications'
-    | '/_app/settings'
-    | '/call/$id'
     | '/_app/'
-    | '/_app/messages/$id'
     | '/_app/profile/$username'
-    | '/_app/messages/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  CallIdRoute: typeof CallIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -201,47 +125,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/call/$id': {
-      id: '/call/$id'
-      path: '/call/$id'
-      fullPath: '/call/$id'
-      preLoaderRoute: typeof CallIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/settings': {
-      id: '/_app/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/notifications': {
       id: '/_app/notifications'
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
-    }
-    '/_app/messages': {
-      id: '/_app/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof AppMessagesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/explore': {
-      id: '/_app/explore'
-      path: '/explore'
-      fullPath: '/explore'
-      preLoaderRoute: typeof AppExploreRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/messages/': {
-      id: '/_app/messages/'
-      path: '/'
-      fullPath: '/messages/'
-      preLoaderRoute: typeof AppMessagesIndexRouteImport
-      parentRoute: typeof AppMessagesRoute
     }
     '/_app/profile/$username': {
       id: '/_app/profile/$username'
@@ -250,44 +139,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileUsernameRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/messages/$id': {
-      id: '/_app/messages/$id'
-      path: '/$id'
-      fullPath: '/messages/$id'
-      preLoaderRoute: typeof AppMessagesIdRouteImport
-      parentRoute: typeof AppMessagesRoute
-    }
   }
 }
 
-interface AppMessagesRouteChildren {
-  AppMessagesIdRoute: typeof AppMessagesIdRoute
-  AppMessagesIndexRoute: typeof AppMessagesIndexRoute
-}
-
-const AppMessagesRouteChildren: AppMessagesRouteChildren = {
-  AppMessagesIdRoute: AppMessagesIdRoute,
-  AppMessagesIndexRoute: AppMessagesIndexRoute,
-}
-
-const AppMessagesRouteWithChildren = AppMessagesRoute._addFileChildren(
-  AppMessagesRouteChildren,
-)
-
 interface AppRouteChildren {
-  AppExploreRoute: typeof AppExploreRoute
-  AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
-  AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppProfileUsernameRoute: typeof AppProfileUsernameRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppExploreRoute: AppExploreRoute,
-  AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
-  AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppProfileUsernameRoute: AppProfileUsernameRoute,
 }
@@ -298,8 +160,17 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  CallIdRoute: CallIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
