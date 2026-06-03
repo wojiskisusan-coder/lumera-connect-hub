@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
+import { Route as AppCreateRouteImport } from './routes/_app.create'
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -40,6 +41,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCreateRoute = AppCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileUsernameRoute = AppProfileUsernameRouteImport.update({
   id: '/profile/$username',
   path: '/profile/$username',
@@ -50,12 +56,14 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/create': typeof AppCreateRoute
   '/notifications': typeof AppNotificationsRoute
   '/profile/$username': typeof AppProfileUsernameRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/create': typeof AppCreateRoute
   '/notifications': typeof AppNotificationsRoute
   '/': typeof AppIndexRoute
   '/profile/$username': typeof AppProfileUsernameRoute
@@ -65,6 +73,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_app/create': typeof AppCreateRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/profile/$username': typeof AppProfileUsernameRoute
@@ -75,15 +84,23 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/create'
     | '/notifications'
     | '/profile/$username'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/notifications' | '/' | '/profile/$username'
+  to:
+    | '/login'
+    | '/register'
+    | '/create'
+    | '/notifications'
+    | '/'
+    | '/profile/$username'
   id:
     | '__root__'
     | '/_app'
     | '/login'
     | '/register'
+    | '/_app/create'
     | '/_app/notifications'
     | '/_app/'
     | '/_app/profile/$username'
@@ -132,6 +149,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/create': {
+      id: '/_app/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof AppCreateRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/profile/$username': {
       id: '/_app/profile/$username'
       path: '/profile/$username'
@@ -143,12 +167,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppCreateRoute: typeof AppCreateRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppProfileUsernameRoute: typeof AppProfileUsernameRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCreateRoute: AppCreateRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppIndexRoute: AppIndexRoute,
   AppProfileUsernameRoute: AppProfileUsernameRoute,
@@ -164,3 +190,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
