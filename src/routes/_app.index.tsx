@@ -1,46 +1,62 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CreatePost } from "@/components/create-post";
 import { PostCard } from "@/components/post-card";
-import { posts } from "@/lib/mock-data";
-import { Sparkles, Users } from "lucide-react";
-import { useState } from "react";
+import { StoriesBar } from "@/components/stories-bar";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { fetchFeed, type FeedPost } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/")({
-  head: () => ({
-    meta: [
-      { title: "Feed · Lumera" },
-      { name: "description", content: "Your real-time feed on Lumera." },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Home · Lumera" }] }),
   component: Feed,
 });
 
 function Feed() {
+  const { user } = useAuth();
   const [tab, setTab] = useState<"for-you" | "following">("for-you");
-  return (
-    <div className="border-x border-border/60">
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl">
-        <h1 className="text-xl font-bold">Home</h1>
-        <div className="flex rounded-full border border-border/60 bg-muted/40 p-1 text-xs font-bold">
-          <button
-            onClick={() => setTab("for-you")}
-            className={`flex items-center gap-1 rounded-full px-3 py-1.5 transition-all ${tab === "for-you" ? "bg-gradient-aurora text-background shadow-glow" : "text-muted-foreground"}`}
-          >
-            <Sparkles className="h-3 w-3" /> For you
-          </button>
-          <button
-            onClick={() => setTab("following")}
-            className={`flex items-center gap-1 rounded-full px-3 py-1.5 transition-all ${tab === "following" ? "bg-gradient-aurora text-background shadow-glow" : "text-muted-foreground"}`}
-          >
-            <Users className="h-3 w-3" /> Following
-          </button>
-        </div>
-      </header>
+  const [posts, setPosts] = useState<FeedPost[] | null>(null);
 
-      <div className="space-y-4 p-4">
-        <CreatePost />
-        {posts.map((p) => <PostCard key={p.id} post={p} />)}
+  async function load() {
+    setPosts(await fetchFeed(tab, user?.id ?? null));
+  }
+
+  useEffect(() => {
+    load();
+    const ch = supabase
+      .channel("feed")
+      .on("postgres_changes", { event: "*", schema: "public", table: "posts" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "reactions" }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, user?.id]);
+
+  return (
+    <div>
+      <div className="sticky top-[57px] z-20 flex border-b border-border bg-background">
+        {(["for-you", "following"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`flex-1 py-3 text-sm font-semibold ${tab === t ? "border-b-2 border-primary text-foreground" : "text-muted-foreground"}`}
+          >
+            {t === "for-you" ? "For you" : "Following"}
+          </button>
+        ))}
       </div>
+      <StoriesBar />
+      <CreatePost />
+      {posts === null ? (
+        <div className="grid place-items-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+      ) : posts.length === 0 ? (
+        <p className="py-12 text-center text-sm text-muted-foreground">
+          {tab === "following" ? "Follow people to see their posts here." : "No posts yet. Be the first to post!"}
+        </p>
+      ) : (
+        posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />)
+      )}
     </div>
   );
 }
