@@ -1,97 +1,74 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Compass, Bell, MessageCircle, User, Settings, LogOut } from "lucide-react";
+import { Home, Search, PlusSquare, Bell, User } from "lucide-react";
 import { LumeraWordmark } from "./lumera-logo";
-import { me } from "@/lib/mock-data";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const items = [
-  { to: "/", label: "Feed", icon: Home },
-  { to: "/explore", label: "Explore", icon: Compass },
-  { to: "/notifications", label: "Notifications", icon: Bell, badge: 3 },
-  { to: "/messages", label: "Messages", icon: MessageCircle, badge: 2 },
-  { to: "/profile/you", label: "Profile", icon: User },
-  { to: "/settings", label: "Settings", icon: Settings },
-];
-
-export function AppSidebar() {
-  const path = useRouterState({ select: (s) => s.location.pathname });
+export function MobileTopBar() {
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border/60 bg-sidebar/70 backdrop-blur-xl lg:flex">
-      <div className="px-6 pt-6 pb-4">
-        <Link to="/"><LumeraWordmark /></Link>
-      </div>
-
-      <nav className="flex-1 space-y-1 px-3">
-        {items.map((it) => {
-          const active =
-            it.to === "/" ? path === "/" : path.startsWith(it.to);
-          return (
-            <Link
-              key={it.to}
-              to={it.to}
-              className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
-                active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
-              }`}
-            >
-              {active && (
-                <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-gradient-aurora" />
-              )}
-              <it.icon className="h-5 w-5" />
-              <span className="flex-1">{it.label}</span>
-              {it.badge ? (
-                <span className="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[10px] font-bold text-accent-foreground">
-                  {it.badge}
-                </span>
-              ) : null}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="border-t border-border/60 p-3">
-        <Link
-          to="/profile/you"
-          className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-sidebar-accent/60"
-        >
-          <Avatar className="h-10 w-10 ring-2 ring-primary/30">
-            <AvatarImage src={me.avatar} />
-            <AvatarFallback>You</AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{me.name}</p>
-            <p className="truncate text-xs text-muted-foreground">@{me.username}</p>
-          </div>
-          <LogOut className="h-4 w-4 text-muted-foreground" />
-        </Link>
-      </div>
-    </aside>
+    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border/60 bg-background/90 px-4 py-3 backdrop-blur">
+      <Link to="/"><LumeraWordmark /></Link>
+      <Link to="/notifications" aria-label="Notifications" className="relative grid h-9 w-9 place-items-center rounded-full hover:bg-muted">
+        <Bell className="h-5 w-5" />
+        <UnreadDot />
+      </Link>
+    </header>
   );
 }
 
+function UnreadDot() {
+  const { user } = useAuth();
+  const [has, setHas] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const load = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      if (active) setHas((count ?? 0) > 0);
+    };
+    load();
+    const ch = supabase
+      .channel("notif-dot")
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load)
+      .subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
+  }, [user]);
+  if (!has) return null;
+  return <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent" />;
+}
+
 export function MobileBottomNav() {
+  const { profile } = useAuth();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const items = [
+    { to: "/", label: "Home", icon: Home, match: (p: string) => p === "/" },
+    { to: "/search", label: "Search", icon: Search, match: (p: string) => p.startsWith("/search") },
+    { to: "/create", label: "Create", icon: PlusSquare, match: (p: string) => p.startsWith("/create") },
+    { to: "/notifications", label: "Alerts", icon: Bell, match: (p: string) => p.startsWith("/notifications") },
+    {
+      to: profile ? `/profile/${profile.username}` : "/login",
+      label: "Profile",
+      icon: User,
+      match: (p: string) => p.startsWith("/profile"),
+    },
+  ] as const;
+
   return (
-    <nav className="sticky bottom-0 z-40 flex border-t border-border/60 bg-background/90 backdrop-blur-xl lg:hidden">
-      {items.slice(0, 5).map((it) => {
-        const active = it.to === "/" ? path === "/" : path.startsWith(it.to);
+    <nav className="fixed bottom-0 left-0 right-0 z-40 mx-auto flex max-w-xl border-t border-border bg-background/95 backdrop-blur">
+      {items.map((it) => {
+        const active = it.match(path);
         return (
           <Link
-            key={it.to}
+            key={it.label}
             to={it.to}
-            className={`flex flex-1 flex-col items-center gap-0.5 py-3 text-[10px] font-medium ${
-              active ? "text-primary" : "text-muted-foreground"
-            }`}
+            className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium ${active ? "text-primary" : "text-muted-foreground"}`}
           >
-            <div className="relative">
-              <it.icon className="h-5 w-5" />
-              {it.badge ? (
-                <span className="absolute -right-2 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
-                  {it.badge}
-                </span>
-              ) : null}
-            </div>
+            <it.icon className={`h-6 w-6 ${it.label === "Create" && active ? "" : ""}`} strokeWidth={active ? 2.5 : 1.8} />
             {it.label}
           </Link>
         );
