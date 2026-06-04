@@ -1,16 +1,14 @@
-export function LumeraLogo({ className = "h-8 w-8" }: { className?: string }) {
-  return (
-    <div className={`${className} relative grid place-items-center rounded-2xl bg-gradient-aurora shadow-glow`}>
-      <span className="text-[0.65em] font-black tracking-tighter text-background">L</span>
-    </div>
-  );
-}
+import { Sparkles } from "lucide-react";
 
 export function LumeraWordmark() {
   return (
     <div className="flex items-center gap-2">
-      <LumeraLogo className="h-9 w-9" />
-      <span className="text-xl font-bold tracking-tight">Lumera</span>
+      <span className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-aurora shadow-glow shimmer">
+        <Sparkles className="h-4 w-4 text-background" strokeWidth={2.5} />
+      </span>
+      <span className="font-display text-[15px] font-extrabold tracking-tight text-foreground">
+        Lumera<span className="text-gradient-aurora">·Connect</span>
+      </span>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export function PostCard({ post, onChanged }: { post: FeedPost; onChanged?: () =
   async function handleShare() {
     const url = `${window.location.origin}/post/${post.author_id}/${post.id}`;
     try {
-      if (navigator.share) await navigator.share({ url, title: `${post.author.username} on Lumera` });
+      if (navigator.share) await navigator.share({ url, title: `${post.author.username} on Lumera-Connect` });
       else { await navigator.clipboard.writeText(url); toast.success("Link copied"); }
     } catch {/* user cancelled */}
   }

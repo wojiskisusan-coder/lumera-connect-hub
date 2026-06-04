@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      aircimp_tokens: {
+        Row: {
+          code: string
+          generated_at: string | null
+          generated_by: string | null
+          redeemed_at: string | null
+          redeemed_by: string | null
+        }
+        Insert: {
+          code: string
+          generated_at?: string | null
+          generated_by?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+        }
+        Update: {
+          code?: string
+          generated_at?: string | null
+          generated_by?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aircimp_tokens_redeemed_by_fkey"
+            columns: ["redeemed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookmarks: {
         Row: {
           created_at: string
@@ -225,10 +257,14 @@ export type Database = {
           bio: string | null
           cover_url: string | null
           created_at: string
+          diamonds: number
           full_name: string | null
           id: string
+          language: string
           location: string | null
+          theme: string
           username: string
+          verified: boolean
           website: string | null
         }
         Insert: {
@@ -236,10 +272,14 @@ export type Database = {
           bio?: string | null
           cover_url?: string | null
           created_at?: string
+          diamonds?: number
           full_name?: string | null
           id: string
+          language?: string
           location?: string | null
+          theme?: string
           username: string
+          verified?: boolean
           website?: string | null
         }
         Update: {
@@ -247,10 +287,14 @@ export type Database = {
           bio?: string | null
           cover_url?: string | null
           created_at?: string
+          diamonds?: number
           full_name?: string | null
           id?: string
+          language?: string
           location?: string | null
+          theme?: string
           username?: string
+          verified?: boolean
           website?: string | null
         }
         Relationships: []
@@ -365,12 +409,49 @@ export type Database = {
           },
         ]
       }
+      token_redemptions: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_redemptions_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "aircimp_tokens"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "token_redemptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_aircimp_token: { Args: never; Returns: Json }
+      redeem_aircimp_token: { Args: { token_code: string }; Returns: Json }
     }
     Enums: {
       post_visibility: "public" | "followers" | "private"

@@ -13,7 +13,7 @@ const ICON: Record<string, { Icon: any; color: string; verb: string }> = {
 };
 
 export const Route = createFileRoute("/_app/notifications")({
-  head: () => ({ meta: [{ title: "Notifications · Lumera" }] }),
+  head: () => ({ meta: [{ title: "Notifications · Lumera-Connect" }] }),
   component: Notifications,
 });
 

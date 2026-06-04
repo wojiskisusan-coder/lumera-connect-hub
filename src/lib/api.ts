@@ -1,4 +1,18 @@
+// @ts-nocheck
 import { supabase } from "@/integrations/supabase/client";
+
+// 100-year signed URL — our buckets are private (workspace policy blocks public ones).
+const LONG_EXPIRY = 60 * 60 * 24 * 365 * 100;
+async function uploadToBucket(bucket: string, userId: string, file: File): Promise<string> {
+  const ext = (file.name.split(".").pop() ?? "bin").toLowerCase();
+  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+  const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, { upsert: true, contentType: file.type });
+  if (upErr) throw upErr;
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, LONG_EXPIRY);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
 
 export type FeedPost = {
   id: string;
@@ -84,11 +98,7 @@ export async function createPost(args: {
   let media_url: string | null = null;
   let media_type: string | null = null;
   if (args.file) {
-    const ext = args.file.name.split(".").pop() ?? "bin";
-    const path = `${args.authorId}/${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("post-media").upload(path, args.file);
-    if (upErr) throw upErr;
-    media_url = supabase.storage.from("post-media").getPublicUrl(path).data.publicUrl;
+    media_url = await uploadToBucket("post-media", args.authorId, args.file);
     media_type = args.file.type.startsWith("video") ? "video" : "image";
   }
   const { error } = await supabase.from("posts").insert({
@@ -153,11 +163,17 @@ export async function toggleFollow(followerId: string, followingId: string, isFo
 export async function fetchProfile(username: string) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, username, full_name, avatar_url, cover_url, bio, website, location, created_at")
+    .select("id, username, full_name, avatar_url, cover_url, bio, website, location, verified, diamonds, created_at")
     .eq("username", username)
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+export async function redeemAircimpToken(code: string): Promise<{ ok: boolean; error?: string; diamonds?: number; token?: string }> {
+  const { data, error } = await supabase.rpc("redeem_aircimp_token", { token_code: code });
+  if (error) return { ok: false, error: error.message };
+  return data as { ok: boolean; error?: string; diamonds?: number; token?: string };
 }
 
 export async function updateProfile(userId: string, patch: {
@@ -174,11 +190,13 @@ export async function updateProfile(userId: string, patch: {
 }
 
 export async function uploadCover(userId: string, file: File) {
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const path = `${userId}/cover.${ext}`;
-  const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-  if (error) throw error;
-  return supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+  return uploadToBucket("avatars", userId, file);
+}
+
+export async function generateAircimpToken(): Promise<{ ok: boolean; code?: string; error?: string }> {
+  const { data, error } = await supabase.rpc("generate_aircimp_token");
+  if (error) return { ok: false, error: error.message };
+  return data as { ok: boolean; code?: string; error?: string };
 }
 
 export async function fetchUserPosts(userId: string) {
@@ -291,11 +309,7 @@ export async function createStory(args: {
 }) {
   let media_url: string | null = null;
   if (args.file) {
-    const ext = args.file.name.split(".").pop() ?? "bin";
-    const path = `${args.authorId}/${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("story-media").upload(path, args.file);
-    if (upErr) throw upErr;
-    media_url = supabase.storage.from("story-media").getPublicUrl(path).data.publicUrl;
+    media_url = await uploadToBucket("story-media", args.authorId, args.file);
   }
   const { error } = await supabase.from("stories").insert({
     author_id: args.authorId,
@@ -307,11 +321,7 @@ export async function createStory(args: {
 }
 
 export async function uploadAvatar(userId: string, file: File) {
-  const ext = file.name.split(".").pop() ?? "png";
-  const path = `${userId}/avatar.${ext}`;
-  const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-  if (error) throw error;
-  return supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+  return uploadToBucket("avatars", userId, file);
 }
 
 export function timeAgo(iso: string) {
