@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "../lib/auth";
+import { PrefsProvider } from "../lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -79,27 +80,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumera — light up your social" },
-      { name: "description", content: "Lumera is a real-time social platform for posts, chat, and video calls." },
+      { title: "Lumera-Connect — Social, in liquid glass." },
+      { name: "description", content: "Lumera-Connect by AIRCIMPco — a premium social platform with shimmering aurora UI, gold verification, diamonds and single-use tokens." },
       { name: "author", content: "AIRCIMPco" },
-      { property: "og:title", content: "Lumera — light up your social" },
-      { property: "og:description", content: "Lumera is a real-time social platform for posts, chat, and video calls." },
+      { property: "og:title", content: "Lumera-Connect — Social, in liquid glass." },
+      { property: "og:description", content: "Lumera-Connect by AIRCIMPco — aurora-lit, diamond-rewarded, gold-verified." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lumera — light up your social" },
-      { name: "twitter:description", content: "Lumera is a real-time social platform for posts, chat, and video calls." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/abda4615-d0b0-4513-97cc-a5df02f60163/id-preview-4b3e6db4--e4fe2704-14b7-43ad-9f1e-a9fdcddc9053.lovable.app-1780503402250.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/abda4615-d0b0-4513-97cc-a5df02f60163/id-preview-4b3e6db4--e4fe2704-14b7-43ad-9f1e-a9fdcddc9053.lovable.app-1780503402250.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@AIRCIMPco" },
+      { name: "twitter:title", content: "Lumera-Connect" },
+      { name: "twitter:description", content: "A premium liquid-glass social network." },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700;800&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -127,11 +123,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster />
-      </AuthProvider>
+      <PrefsProvider>
+        <AuthProvider>
+          <Outlet />
+          <Toaster />
+        </AuthProvider>
+      </PrefsProvider>
     </QueryClientProvider>
   );
 }

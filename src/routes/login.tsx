@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in · Lumera" }] }),
+  head: () => ({ meta: [{ title: "Sign in · Lumera-Connect" }] }),
   component: Login,
 });
 
@@ -69,7 +69,7 @@ export function AuthShell({ mode }: { mode: "login" | "register" }) {
               Real-time feed. Instant chat. Crystal-clear calls. All in one place.
             </p>
           </div>
-          <p className="text-xs opacity-70">© Lumera by AIRCIMPco</p>
+          <p className="text-xs opacity-70">© Lumera-Connect by AIRCIMPco</p>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export function AuthShell({ mode }: { mode: "login" | "register" }) {
           <div className="mb-8 lg:hidden"><LumeraWordmark /></div>
           <h2 className="text-3xl font-bold">{isLogin ? "Welcome back" : "Create your account"}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isLogin ? "Sign in to continue to Lumera." : "Join the Lumera community."}
+            {isLogin ? "Sign in to continue to Lumera-Connect." : "Join the Lumera-Connect community."}
           </p>
 
           <form className="mt-8 space-y-4" onSubmit={handleSubmit}>

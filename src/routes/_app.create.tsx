@@ -8,7 +8,7 @@ import { createPost, createStory } from "@/lib/api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/create")({
-  head: () => ({ meta: [{ title: "Create · Lumera" }] }),
+  head: () => ({ meta: [{ title: "Create · Lumera-Connect" }] }),
   validateSearch: (s: Record<string, unknown>) => ({ kind: s.kind === "story" ? "story" : "post" }),
   component: Create,
 });

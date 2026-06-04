@@ -13,9 +13,14 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppSearchRouteImport } from './routes/_app.search'
+import { Route as AppRedeemRouteImport } from './routes/_app.redeem'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppCreateRouteImport } from './routes/_app.create'
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
+import { Route as AppProfileUsernameEditRouteImport } from './routes/_app.profile.$username.edit'
+import { Route as AppPostUserIdPostIdRouteImport } from './routes/_app.post.$userId.$postId'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -36,6 +41,21 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSearchRoute = AppSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRedeemRoute = AppRedeemRouteImport.update({
+  id: '/redeem',
+  path: '/redeem',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -51,6 +71,16 @@ const AppProfileUsernameRoute = AppProfileUsernameRouteImport.update({
   path: '/profile/$username',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProfileUsernameEditRoute = AppProfileUsernameEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AppProfileUsernameRoute,
+} as any)
+const AppPostUserIdPostIdRoute = AppPostUserIdPostIdRouteImport.update({
+  id: '/post/$userId/$postId',
+  path: '/post/$userId/$postId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -58,15 +88,25 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/create': typeof AppCreateRoute
   '/notifications': typeof AppNotificationsRoute
-  '/profile/$username': typeof AppProfileUsernameRoute
+  '/redeem': typeof AppRedeemRoute
+  '/search': typeof AppSearchRoute
+  '/settings': typeof AppSettingsRoute
+  '/profile/$username': typeof AppProfileUsernameRouteWithChildren
+  '/post/$userId/$postId': typeof AppPostUserIdPostIdRoute
+  '/profile/$username/edit': typeof AppProfileUsernameEditRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/create': typeof AppCreateRoute
   '/notifications': typeof AppNotificationsRoute
+  '/redeem': typeof AppRedeemRoute
+  '/search': typeof AppSearchRoute
+  '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
-  '/profile/$username': typeof AppProfileUsernameRoute
+  '/profile/$username': typeof AppProfileUsernameRouteWithChildren
+  '/post/$userId/$postId': typeof AppPostUserIdPostIdRoute
+  '/profile/$username/edit': typeof AppProfileUsernameEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,8 +115,13 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/create': typeof AppCreateRoute
   '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/redeem': typeof AppRedeemRoute
+  '/_app/search': typeof AppSearchRoute
+  '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
-  '/_app/profile/$username': typeof AppProfileUsernameRoute
+  '/_app/profile/$username': typeof AppProfileUsernameRouteWithChildren
+  '/_app/post/$userId/$postId': typeof AppPostUserIdPostIdRoute
+  '/_app/profile/$username/edit': typeof AppProfileUsernameEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,15 +131,25 @@ export interface FileRouteTypes {
     | '/register'
     | '/create'
     | '/notifications'
+    | '/redeem'
+    | '/search'
+    | '/settings'
     | '/profile/$username'
+    | '/post/$userId/$postId'
+    | '/profile/$username/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/register'
     | '/create'
     | '/notifications'
+    | '/redeem'
+    | '/search'
+    | '/settings'
     | '/'
     | '/profile/$username'
+    | '/post/$userId/$postId'
+    | '/profile/$username/edit'
   id:
     | '__root__'
     | '/_app'
@@ -102,8 +157,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/_app/create'
     | '/_app/notifications'
+    | '/_app/redeem'
+    | '/_app/search'
+    | '/_app/settings'
     | '/_app/'
     | '/_app/profile/$username'
+    | '/_app/post/$userId/$postId'
+    | '/_app/profile/$username/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -142,6 +202,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/search': {
+      id: '/_app/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof AppSearchRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/redeem': {
+      id: '/_app/redeem'
+      path: '/redeem'
+      fullPath: '/redeem'
+      preLoaderRoute: typeof AppRedeemRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/notifications': {
       id: '/_app/notifications'
       path: '/notifications'
@@ -163,21 +244,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileUsernameRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/profile/$username/edit': {
+      id: '/_app/profile/$username/edit'
+      path: '/edit'
+      fullPath: '/profile/$username/edit'
+      preLoaderRoute: typeof AppProfileUsernameEditRouteImport
+      parentRoute: typeof AppProfileUsernameRoute
+    }
+    '/_app/post/$userId/$postId': {
+      id: '/_app/post/$userId/$postId'
+      path: '/post/$userId/$postId'
+      fullPath: '/post/$userId/$postId'
+      preLoaderRoute: typeof AppPostUserIdPostIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
+
+interface AppProfileUsernameRouteChildren {
+  AppProfileUsernameEditRoute: typeof AppProfileUsernameEditRoute
+}
+
+const AppProfileUsernameRouteChildren: AppProfileUsernameRouteChildren = {
+  AppProfileUsernameEditRoute: AppProfileUsernameEditRoute,
+}
+
+const AppProfileUsernameRouteWithChildren =
+  AppProfileUsernameRoute._addFileChildren(AppProfileUsernameRouteChildren)
 
 interface AppRouteChildren {
   AppCreateRoute: typeof AppCreateRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppRedeemRoute: typeof AppRedeemRoute
+  AppSearchRoute: typeof AppSearchRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
-  AppProfileUsernameRoute: typeof AppProfileUsernameRoute
+  AppProfileUsernameRoute: typeof AppProfileUsernameRouteWithChildren
+  AppPostUserIdPostIdRoute: typeof AppPostUserIdPostIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCreateRoute: AppCreateRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppRedeemRoute: AppRedeemRoute,
+  AppSearchRoute: AppSearchRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
-  AppProfileUsernameRoute: AppProfileUsernameRoute,
+  AppProfileUsernameRoute: AppProfileUsernameRouteWithChildren,
+  AppPostUserIdPostIdRoute: AppPostUserIdPostIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
